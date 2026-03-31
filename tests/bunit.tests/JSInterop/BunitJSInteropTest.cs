@@ -702,4 +702,93 @@ public partial class BunitJSInteropTest
 		var exception = await Should.ThrowAsync<JSRuntimeInvocationNotSetException>(invocationTask.AsTask());
 		exception.Invocation.Identifier.ShouldBe(identifier);
 	}
+
+#if NET10_0_OR_GREATER
+	[Fact(DisplayName = "InvokeConstructorAsync returns IJSObjectReference in loose mode without setup")]
+	public async Task Test400()
+	{
+		var sut = CreateSut(JSRuntimeMode.Loose);
+
+		var result = await sut.JSRuntime.InvokeConstructorAsync("SomeClass");
+
+		result.ShouldNotBeNull();
+		result.ShouldBeAssignableTo<IJSObjectReference>();
+	}
+
+	[Fact(DisplayName = "InvokeConstructorAsync throws in strict mode when no handler is set up")]
+	public void Test401()
+	{
+		var sut = CreateSut(JSRuntimeMode.Strict);
+
+		Should.Throw<JSRuntimeUnhandledInvocationException>(
+			async () => await sut.JSRuntime.InvokeConstructorAsync("SomeClass"));
+	}
+
+	[Theory(DisplayName = "InvokeConstructorAsync records invocation with correct method name and arguments"), AutoData]
+	public void Test402(string identifier)
+	{
+		var args = new object[] { "arg1", 42 };
+		var sut = CreateSut(JSRuntimeMode.Loose);
+
+		sut.JSRuntime.InvokeConstructorAsync(identifier, args);
+
+		var invocation = sut.Invocations[identifier].ShouldHaveSingleItem();
+		invocation.Identifier.ShouldBe(identifier);
+		invocation.Arguments.ShouldBe(args);
+		invocation.InvocationMethodName.ShouldBe("InvokeConstructorAsync");
+		invocation.ResultType.ShouldBe(typeof(IJSObjectReference));
+	}
+
+	[Theory(DisplayName = "InvokeConstructorAsync with CancellationToken records invocation correctly"), AutoData]
+	public void Test403(string identifier)
+	{
+		var args = new object[] { "arg1" };
+		using var cts = new CancellationTokenSource();
+		var sut = CreateSut(JSRuntimeMode.Loose);
+
+		sut.JSRuntime.InvokeConstructorAsync(identifier, cts.Token, args);
+
+		var invocation = sut.Invocations[identifier].ShouldHaveSingleItem();
+		invocation.Identifier.ShouldBe(identifier);
+		invocation.Arguments.ShouldBe(args);
+		invocation.CancellationToken.ShouldBe(cts.Token);
+		invocation.InvocationMethodName.ShouldBe("InvokeConstructorAsync");
+	}
+
+	[Fact(DisplayName = "InvokeConstructorAsync with SetupModule handler returns configured object reference")]
+	public async Task Test404()
+	{
+		var sut = CreateSut(JSRuntimeMode.Strict);
+		sut.SetupModule(inv => inv.Identifier == "SomeClass" && inv.InvocationMethodName == "InvokeConstructorAsync");
+
+		var result = await sut.JSRuntime.InvokeConstructorAsync("SomeClass");
+
+		result.ShouldNotBeNull();
+		result.ShouldBeAssignableTo<IJSObjectReference>();
+	}
+
+	[Fact(DisplayName = "InvokeConstructorAsync on IJSObjectReference from module import works in loose mode")]
+	public async Task Test405()
+	{
+		var sut = CreateSut(JSRuntimeMode.Loose);
+
+		var module = await sut.JSRuntime.InvokeAsync<IJSObjectReference>("import", "./myModule.js");
+		var result = await module.InvokeConstructorAsync("JsClass", "arg1", "arg2");
+
+		result.ShouldNotBeNull();
+		result.ShouldBeAssignableTo<IJSObjectReference>();
+	}
+
+	[Fact(DisplayName = "InvokeConstructorAsync on IJSObjectReference records invocation")]
+	public async Task Test406()
+	{
+		var sut = CreateSut(JSRuntimeMode.Loose);
+
+		var module = await sut.JSRuntime.InvokeAsync<IJSObjectReference>("import", "./myModule.js");
+		await module.InvokeConstructorAsync("JsClass", "arg1");
+
+		sut.Invocations["JsClass"].ShouldHaveSingleItem()
+			.InvocationMethodName.ShouldBe("InvokeConstructorAsync");
+	}
+#endif
 }

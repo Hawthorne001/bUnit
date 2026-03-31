@@ -85,6 +85,21 @@ internal static class JSRuntimeExtensions
 			.GetResult();
 	}
 
+#if NET10_0_OR_GREATER
+	internal static ValueTask<IJSObjectReference> HandleInvokeConstructorAsync(this BunitJSInterop jSInterop, string identifier, object?[]? args)
+	{
+		var invocation = new JSRuntimeInvocation(identifier, null, args, typeof(IJSObjectReference), "InvokeConstructorAsync");
+		return jSInterop.HandleInvocation<IJSObjectReference>(invocation);
+	}
+
+	[SuppressMessage("Design", "CA1068:CancellationToken parameters must come last", Justification = "Matching Blazor's JSRuntime design.")]
+	internal static ValueTask<IJSObjectReference> HandleInvokeConstructorAsync(this BunitJSInterop jSInterop, string identifier, CancellationToken cancellationToken, object?[]? args)
+	{
+		var invocation = new JSRuntimeInvocation(identifier, cancellationToken, args, typeof(IJSObjectReference), "InvokeConstructorAsync");
+		return jSInterop.HandleInvocation<IJSObjectReference>(invocation);
+	}
+#endif
+
 	private static string GetInvokeAsyncMethodName<TValue>()
 		=> typeof(TValue) == typeof(Microsoft.JSInterop.Infrastructure.IJSVoidResult)
 			? "InvokeVoidAsync"
