@@ -6,6 +6,10 @@ All notable changes to **bUnit** will be documented in this file. The project ad
 
 ## [Unreleased]
 
+### Fixed
+
+- Implemented `InvokeConstructorAsync` on `BunitJSRuntime` and `BunitJSObjectReference` for .NET 10+, which previously threw `NotImplementedException`. Reported by [@Floopy-Doo](https://github.com/Floopy-Doo) in #1818. Fixed by [@linkdotnet](https://github.com/linkdotnet).
+
 ## [2.6.2] - 2026-02-27
 
 ### Added

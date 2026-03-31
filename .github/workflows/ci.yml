@@ -78,7 +78,7 @@ jobs:
         dotnet pack src/bunit.generators/ -c release --output ${{ env.NUGET_DIRECTORY }} -p:ContinuousIntegrationBuild=true -p:publicrelease=true
 
     # Publish the NuGet package as an artifact, so they can be used in the following jobs
-    - uses: actions/upload-artifact@v6
+    - uses: actions/upload-artifact@v7
       with:
         name: ${{ env.NUGET_PACKAGES_ARTIFACT }}
         if-no-files-found: error
@@ -93,7 +93,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ${{ env.NUGET_PACKAGES_ARTIFACT }}
           path: ${{ env.NUGET_DIRECTORY }}
@@ -141,7 +141,7 @@ jobs:
 
       - name: 📛 Upload hang- and crash-dumps on test failure
         if: success() || failure()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           if-no-files-found: ignore
           name: test-dumps
@@ -163,7 +163,7 @@ jobs:
           dotnet-version: |
             10.0.x
 
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ${{ env.NUGET_PACKAGES_ARTIFACT }}
           path: ${{ env.NUGET_DIRECTORY }}
@@ -278,7 +278,7 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           name: ${{ env.NUGET_PACKAGES_ARTIFACT }}
           path: ${{ env.NUGET_DIRECTORY }}

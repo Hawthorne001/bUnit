@@ -37,7 +37,7 @@ jobs:
 
       - name: ⚙️ Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@v6
+        uses: crazy-max/ghaction-import-gpg@v7
         with:
           gpg_private_key: ${{ secrets.BUNIT_BOT_GPG_PRIVATE_KEY }}
           passphrase: ${{ secrets.BUNIT_BOT_GPG_KEY_PASSPHRASE }}
@@ -98,7 +98,7 @@ jobs:
 
       - name: 🛠️ Deploy to GitHub Pages
         if: success()
-        uses: crazy-max/ghaction-github-pages@v4
+        uses: crazy-max/ghaction-github-pages@v5
         with:
           build_dir: docs/site/_site
           fqdn: bunit.dev

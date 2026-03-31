@@ -25,6 +25,12 @@ internal sealed class BunitJSObjectReference : IJSObjectReference, IJSInProcessO
 
 #if NET10_0_OR_GREATER
 	/// <inheritdoc/>
+	public ValueTask<IJSObjectReference> InvokeConstructorAsync(string identifier, object?[]? args)
+		=> JSInterop.HandleInvokeConstructorAsync(identifier, args);
+
+	/// <inheritdoc/>
+	public ValueTask<IJSObjectReference> InvokeConstructorAsync(string identifier, CancellationToken cancellationToken, object?[]? args)
+		=> JSInterop.HandleInvokeConstructorAsync(identifier, cancellationToken, args);
 
 	/// <inheritdoc/>
 	public ValueTask<TValue> GetValueAsync<TValue>(string identifier) => throw new NotImplementedException();
